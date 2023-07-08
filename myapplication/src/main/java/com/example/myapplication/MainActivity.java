@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         bdiv= findViewById(R.id.bdiv);
         btan= findViewById(R.id.btan);
         bmul= findViewById(R.id.bmul);
-        bmul= findViewById(R.id.bfact);
         bfact= findViewById(R.id.bfact);
         bminus= findViewById(R.id.bminus);
         broot= findViewById(R.id.broot);
@@ -114,7 +113,235 @@ public class MainActivity extends AppCompatActivity {
                 tvmain.setText(tvmain.getText() + "0");
             }
         });
+        bpoint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + ".");
+            }
+        });
+        bac.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText("");
+                tvsec.setText("");
+            }
+        });
+        bc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String val = tvmain.getText().toString();
+                val = val.substring(0, val.length() - 1);
+                tvmain.setText(val);
+            }
+        });
+        bplus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "+");
+            }
+        });
+        bminus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "-");
+            }
+        });
+        bdiv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "÷");
+            }
+        });
+        bmul.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "×");
+            }
+        });
+        broot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String val = tvmain.getText().toString();
+                double r = Math.sqrt(Double.parseDouble(val));
+                tvmain.setText(String.valueOf(r));
+            }
+        });
+        bb1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "(");
+            }
+        });
+        bb2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + ")");
+            }
+        });
+        bpi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvsec.setText(bpi.getText());
+                tvmain.setText(tvmain.getText() + pi);
+            }
+        });
+        bsin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "sin");
+            }
+        });
+        bcos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "cos");
+            }
+        });
+        btan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "tan");
+            }
+        });
+        bhalf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "^" + "(-1)");
+            }
+        });
+        bfact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int val = Integer.parseInt(tvmain.getText().toString());
+                int fact = factorial(val);
+                tvmain.setText(String.valueOf(fact));
+                tvsec.setText(val + "!");
+            }
+        });
+        bx2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                double d = Double.parseDouble(tvmain.getText().toString());
+                double square = d * d;
+                tvmain.setText(String.valueOf(square));
+                tvsec.setText(d + "²");
+            }
+        });
+        bln.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "ln");
+            }
+        });
+        blog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tvmain.setText(tvmain.getText() + "log");
+            }
+        });
+        bequals.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String val = tvmain.getText().toString();
+                String replacedstr = val.replace('÷', '/').replace('×', '*');
+                double result = eval(replacedstr);
+                tvmain.setText((String.valueOf(result)));
+                tvsec.setText(val);
 
+            }
+        });
+
+
+    }
+
+    //factorial function
+    private int factorial(int n)
+    {
+        return (n==1 || n==0) ? 1: n*factorial(n-1);
+    }
+
+    //eval function
+    public static double eval(final String str) {
+        return new Object() {
+            int pos = -1, ch;
+
+            void nextChar() {
+                ch = (++pos < str.length()) ? str.charAt(pos) : -1;
+            }
+
+            boolean eat(int charToEat) {
+                while (ch == ' ') nextChar();
+                if (ch == charToEat) {
+                    nextChar();
+                    return true;
+                }
+                return false;
+            }
+
+            double parse() {
+                nextChar();
+                double x = parseExpression();
+                if (pos < str.length()) throw new RuntimeException("Unexpected: " + (char) ch);
+                return x;
+            }
+
+            //Grammer:
+            //expression = term | expression '+' term | expression '-' term
+            //term = factor | term '*' factor | term '/' factor
+            //factor = '+' factor | '-' factor | '(' expression ')'
+            //        | number | factorName factor | factor '^' factor
+
+            double parseExpression() {
+                double x = parseTerm();
+                for (; ; ) {
+                    if (eat('+')) x += parseTerm(); //Addition
+                    else if (eat('-')) x -= parseTerm(); //Subtraction
+                    else return x;
+                }
+            }
+
+            double parseTerm() {
+                double x = parseFactor();
+                for (; ; ) {
+                    if (eat('*')) x *= parseTerm(); //Multiplication
+                    else if (eat('/')) x /= parseTerm(); //Division
+                    else return x;
+                }
+            }
+
+            double parseFactor() {
+
+                if (eat('+')) return parseFactor(); //Unary Plus
+                if (eat('-')) return -parseFactor(); //Unary Minus
+
+                double x;
+                int startPos = this.pos;
+                if (eat('(')) { // Parentheses
+                    x = parseExpression();
+                    eat(')');
+                } else if ((ch >= '0' && ch <= '9') || ch == '.') { //Numbers
+                    while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
+                    x = Double.parseDouble(str.substring(startPos, this.pos));
+                } else if ((ch >= 'a' && ch <= 'z') || ch == '.') { //Functions
+                    while ((ch >= 'a' && ch <= 'z') || ch == '.') nextChar();
+                    String func = str.substring(startPos, this.pos);
+                    x = parseFactor();
+                    if (func.equals("sqrt")) x = Math.sqrt(x);
+                    else if (func.equals("sin")) x = Math.sin(Math.toRadians(x));
+                    else if (func.equals("cos")) x = Math.cos(Math.toRadians(x));
+                    else if (func.equals("tan")) x = Math.tan(Math.toRadians(x));
+                    else if (func.equals("log")) x = Math.log10(x);
+                    else if (func.equals("ln")) x = Math.log(x);
+                    else throw new RuntimeException("Unknown function: " + func);
+
+                } else {
+                    throw new RuntimeException("Unexpected: " + (char) ch);
+                }
+                if (eat('^')) x = Math.pow(x, parseFactor()); //Exponentiation
+                return x;
+            }
+
+        }.parse();
 
     }
 }
